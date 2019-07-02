@@ -5,7 +5,8 @@
   "main": "main.bundle.js",
   "scripts": {
     "watch": "watchify main.js -t babelify -o main.bundle.js --release --verbose",
-    "build": "browserify main.js -o main.bundle.js -t babelify"
+    "build": "browserify main.js -o main.bundle.js -t babelify",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -43,6 +44,7 @@
     "@babel/preset-env": "^7.4.5",
     "babelify": "^10.0.0",
     "browserify": "^16.2.3",
-    "watchify": "^3.11.1"
+    "watchify": "^3.11.1",
+    "jest": "^24.1.0"
   }
 }
