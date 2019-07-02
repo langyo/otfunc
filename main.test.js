@@ -1,21 +1,20 @@
 import { override, typical, Types } from "./main";
-import Except from "./types/except";
 
 describe("无类型限定的函数重载", () => {
     const funcBasic = override([
         // 演示最基本的函数重载。
         () => true,
 
-        (a, b) => [a, b],
+        (a, b) => [a, b]
     ]);
 
     test("无参数", () => {
-        except(funcBasic()).toBe(true);
+        expect(funcBasic()).toBe(true);
     });
 
     test("带两个参数", () => {
-        except(funcBasic(1, 2).toBe([1, 2]));
-        except(funcBasic("a", "b").toBe(["a", "b"]));
+        expect(funcBasic(1, 2).toBe([1, 2]));
+        expect(funcBasic("a", "b").toBe(["a", "b"]));
     });
 });
 
@@ -56,19 +55,19 @@ describe("带类型限定的函数重载", () => {
 
 
     test("()", () => {
-        except(func()).toBe(true);
+        expect(func()).toBe(true);
     });
     
     test("(Number, String)", () => {
-        except(func(1, "a")).toBe([1, "a"]);
+        expect(func(1, "a")).toBe([1, "a"]);
     });
 
     test("([Number])", () => {
-        except(func([1, 2])).toBe([1, 2]);
+        expect(func([1, 2])).toBe([1, 2]);
     });
 
     test("( DUCK : { name: String, score: Number })", () => {
-        except(func({
+        expect(func({
             name: "langyo",
             score: 233
         })).toBe({
@@ -78,16 +77,16 @@ describe("带类型限定的函数重载", () => {
     });
 
     test("(BigInt | Number, !String)", () => {
-        except(func(233, 233)).toBe([233, 233]);
-        except(func(new BigInt(233), 233)).toBe([new BigInt(233), 233]);
-        except(func(233, /233/)).toBe([233, /233/]);
-        except(func(new BigInt(233), /233/)).toBe([new BigInt(233), /233/]);
-        except(func(233, "123123")).toThrow();
-        except(func(new BigInt(233), "123123")).toThrow();
+        expect(func(233, 233)).toBe([233, 233]);
+        expect(func(new BigInt(233), 233)).toBe([new BigInt(233), 233]);
+        expect(func(233, /233/)).toBe([233, /233/]);
+        expect(func(new BigInt(233), /233/)).toBe([new BigInt(233), /233/]);
+        expect(func(233, "123123")).toThrow();
+        expect(func(new BigInt(233), "123123")).toThrow();
     });
 
     test("([BigInt | Number])", () => {
-        except(func([new BigInt(233), new BigInt(233333)])).toBe([new BigInt(233), new BigInt(233333)]);
+        expect(func([new BigInt(233), new BigInt(233333)])).toBe([new BigInt(233), new BigInt(233333)]);
     });
 })
 

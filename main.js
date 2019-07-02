@@ -20,11 +20,15 @@ export const override = list => {
       return typical(params, func);
     } else return func;
   }).reduce((list, func) => {
+    // Compare func.parameters and each n.parameters in the list.
     let repeat = true;
     list.forEach(n => {
       if (!repeat) return;
       let length = func.parameters.length;
-      if (length !== n.parameters.length) return;
+      if (length !== n.parameters.length) {
+        repeat = false;
+        return;
+      }
       for (let i = 0; i < length; ++i) {
         if (func.parameters[i] instanceof Type) {
           if (n.parameters[i] instanceof Type) repeat = func.parameters[i].equals(n.parameters[i]);
@@ -164,11 +168,11 @@ export const typical = (params, func, level) => {
         // Enum
         /*
           Notice:
-          As well known to all, everything in JavaScript is object , so we don't know what exact class an object is.
+          As well known to all, everything in JavaScript is object, so we don't know what exact class an object is.
           You could only use the build-in  types to create the enum type by using an array,
           otherwise you should use "Types.Enum(...)" to create it.
         */
-        return new Enum(n);
+        return new Enum(arr);
       } else {
         // Union
         return new Union(arr.map(map_arr));
@@ -188,14 +192,15 @@ export const typical = (params, func, level) => {
   };
 
   // Verify the parameter.
-  if(Array.isArray(params)) params = transform_array(param);
-  else if(typeof params === 'object') params = transform_object(param);
+  if(Array.isArray(params)) params = transform_array(params);
+  else if(typeof params === 'object') params = transform_object(params);
 
-  // Write to the functional object.
+  // Write parameters and extra information to the functional object.
   func.parameters = params;
 
   if(level) if(typeof level !== 'number') throw new Error("Level must be a number!");
   func.level = level;
+
   return func;
 };
 
