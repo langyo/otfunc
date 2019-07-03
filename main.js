@@ -22,7 +22,9 @@ export const override = list => {
   }).reduce((list, func) => {
     // Compare func.parameters and each n.parameters in the list.
     let repeat = true;
+    console.log("Now the func is", func.parameters);
     list.forEach(n => {
+      console.log("Comparing", n.parameters);
       if (!repeat) return;
       let length = func.parameters.length;
       if (length !== n.parameters.length) {
