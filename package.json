@@ -5,8 +5,10 @@
   "main": "main.bundle.js",
   "scripts": {
     "watch": "watchify main.js -t babelify -o main.bundle.js --release --verbose",
-    "build": "browserify main.js -o main.bundle.js -t babelify",
-    "test": "jest"
+    "build": "browserify main.js -o main.bundle.js -t babelify -d",
+    "debug:watch": "watchify test.js -t babelify -o test.bundle.js --release --verbose",
+    "debug:build": "browserify test.js -o test.bundle.js -t babelify -d",
+    "test": "jest --watch"
   },
   "repository": {
     "type": "git",
@@ -17,7 +19,7 @@
   "bugs": {
     "url": "https://github.com/langyo/otfunc/issues"
   },
-  "homepage": "https://github.com/langyo/otfunc#readme",
+  "homepage": "https://github.com/langyo/otfunc",
   "babel": {
     "presets": [
       [

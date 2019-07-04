@@ -19,31 +19,33 @@ export const override = list => {
       for (let i = 0; i < func.length; ++i) params.push(Types.Any);
       return typical(params, func);
     } else return func;
-  }).reduce((list, func) => {
-    // Compare func.parameters and each n.parameters in the list.
-    let repeat = true;
-    console.log("Now the func is", func.parameters);
-    list.forEach(n => {
-      console.log("Comparing", n.parameters);
-      if (!repeat) return;
-      let length = func.parameters.length;
-      if (length !== n.parameters.length) {
-        repeat = false;
-        return;
-      }
-      for (let i = 0; i < length; ++i) {
-        if (func.parameters[i] instanceof Type) {
-          if (n.parameters[i] instanceof Type) repeat = func.parameters[i].equals(n.parameters[i]);
-          else repeat = false;
-        } else {
-          if ((typeof func.parameters[i]) !== (typeof n.parameters[i])) repeat = false;
-        }
-      }
-    });
-    if (list.length > 0 && repeat) throw new Error("Repeatical parameters!");
-    list.push(func);
-    return list;
-  }, []);
+  })
+  // .reduce((list, func) => {
+  //   // Compare func.parameters and each n.parameters in the list.
+  //   let repeat = true;
+  //   console.log("Now the func is", func.parameters);
+  //   list.forEach(n => {
+  //     console.log("Comparing", n.parameters);
+  //     if (!repeat) return;
+  //     let length = func.parameters.length;
+  //     if (length !== n.parameters.length) {
+  //       repeat = false;
+  //       return;
+  //     }
+  //     for (let i = 0; i < length; ++i) {
+  //       if (func.parameters[i] instanceof Type) {
+  //         if (n.parameters[i] instanceof Type) repeat = func.parameters[i].equals(n.parameters[i]);
+  //         else repeat = false;
+  //       } else {
+  //         if ((typeof func.parameters[i]) !== (typeof n.parameters[i])) repeat = false;
+  //       }
+  //     }
+  //   });
+  //   console.log("List: ", list);
+  //   if (list.length > 0 && repeat) throw new Error("Repeatical parameters!");
+  //   list.push(func);
+  //   return list;
+  // }, []);
 
   // Create the middle-ware function.
   return function () {

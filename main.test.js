@@ -13,8 +13,8 @@ describe("无类型限定的函数重载", () => {
     });
 
     test("带两个参数", () => {
-        expect(funcBasic(1, 2).toBe([1, 2]));
-        expect(funcBasic("a", "b").toBe(["a", "b"]));
+        expect(funcBasic(1, 2)).toBe([1, 2]);
+        expect(funcBasic("a", "b")).toBe(["a", "b"]);
     });
 });
 
