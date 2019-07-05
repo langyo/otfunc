@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "description": "A JavaScript library to describe the overrided function and typical arguments.",
   "main": "main.bundle.js",
+  "keywords": [
+    "javascript",
+    "functional"
+  ],
   "scripts": {
     "watch": "watchify main.js -t babelify -o main.bundle.js --release --verbose",
     "build": "browserify main.js -o main.bundle.js -t babelify -d",
