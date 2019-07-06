@@ -1,351 +1,351 @@
 const Weights = {
-    Normal: 1
+  Normal: 1
 };
 
 class Type {
-    constructor(name) {
-        this.name = name;
-    }
+  constructor(name) {
+    this.name = name;
+  }
 }
 
 class Any extends Type {
-    constructor() {
-        super("any");
-    }
+  constructor() {
+    super("any");
+  }
 
-    equals(n) {
-        return n.name === this.name;
-    }
+  equals(n) {
+    return n.name === this.name;
+  }
 
-    match(n) {
-        return true;
-    }
+  match(n) {
+    return true;
+  }
 
-    weight() {
-        return Weights.Normal;
-    }
+  weight() {
+    return Weights.Normal;
+  }
 
-    depth() {
-        return 1;
-    }
+  depth() {
+    return 1;
+  }
 }
 
 class Array_ extends Type {
-    constructor(type) {
-        super("array");
-        this.type = type;
+  constructor(type) {
+    super("array");
+    this.type = type;
+  }
+
+  equals(n) {
+    if (n.name !== this.name) return false;
+
+    if (this.type instanceof Type) return this.type.equals(n.type);
+
+    else return this.type === n.type;
+  }
+
+  match(n) {
+    if (!Array.isArray(n)) return false;
+
+    if (this.type instanceof Type) {
+      for (let i of n) {
+        if (!this.type.match(i)) return false;
+      }
+    } else {
+      for (let i of n) {
+        if (!i instanceof this.type) return false;
+      }
     }
+    return true;
+  }
 
-    equals(n) {
-        if (n.name !== this.name) return false;
+  weight() {
+    return (this.type instanceof Type) ? this.type.weight() : Weights.Normal;
+  }
 
-        if (this.type instanceof Type) return this.type.equals(n.type);
-
-        else return this.type === n.type;
-    }
-
-    match(n) {
-        if (!Array.isArray(n)) return false;
-
-        if (this.type instanceof Type) {
-            for (let i of n) {
-                if (!this.type.match(i)) return false;
-            }
-        } else {
-            for (let i of n) {
-                if (!i instanceof this.type) return false;
-            }
-        }
-        return true;
-    }
-
-    weight() {
-        return (this.type instanceof Type) ? this.type.weight() : Weights.Normal;
-    }
-
-    depth() {
-        return 1 + (this.type instanceof Type) ? this.type.depth() : 1;
-    }
+  depth() {
+    return 1 + (this.type instanceof Type) ? this.type.depth() : 1;
+  }
 }
 
 class Default extends Type {
-    constructor(type) {
-        super("default");
-        this.type = type;
-    }
+  constructor(type) {
+    super("default");
+    this.type = type;
+  }
 
-    equals(n) {
-        if(n.name !== this.name) return false;
-        if(this.type instanceof Type) return this.type.equals(n.type);
-        else return this.type === n.type;
-    }
+  equals(n) {
+    if (n.name !== this.name) return false;
+    if (this.type instanceof Type) return this.type.equals(n.type);
+    else return this.type === n.type;
+  }
 
-    match(n) {
-        if(this.type instanceof Type) return this.type.match(n);
-        else return n instanceof this.type;
-    }
+  match(n) {
+    if (this.type instanceof Type) return this.type.match(n);
+    else return n instanceof this.type;
+  }
 
-    weight() {
-        return Weights.Normal;
-    }
+  weight() {
+    return Weights.Normal;
+  }
 
-    depth() {
-        return 1 + (this.type instanceof Type) ? this.type.depth() : 0;
-    }
+  depth() {
+    return 1 + (this.type instanceof Type) ? this.type.depth() : 0;
+  }
 }
 
 class Duck extends Type {
-    constructor(obj) {
-        super("duck");
+  constructor(obj) {
+    super("duck");
 
-        // Check the object.
-        const dfs = n => {
-            for (let i of Object.keys(n)) {
-                if (!(i instanceof Type || ['function', 'object'].indexOf(i) !== -1)) {
-                    throw new Error("You cannot use the build-in values to be the class type!")
-                }
-                if (typeof i === 'object') dfs(i);
-            }
+    // Check the object.
+    const dfs = n => {
+      for (let i of Object.keys(n)) {
+        if (!(i instanceof Type || ['function', 'object'].indexOf(i) !== -1)) {
+          throw new Error("You cannot use the build-in values to be the class type!")
         }
-        if (typeof obj !== 'object') throw new Error("You cannot use the build-in values to be the class type!");
-        dfs(obj);
-
-        this.template = obj;
+        if (typeof i === 'object') dfs(i);
+      }
     }
+    if (typeof obj !== 'object') throw new Error("You cannot use the build-in values to be the class type!");
+    dfs(obj);
 
-    equals(n) {
-        if (n.name !== this.name) return false;
+    this.template = obj;
+  }
 
-        const dfs = (left, right) => {
-            let leftKeys = Object.keys(left).sort(), rightKeys = Object.keys(right).sort();
+  equals(n) {
+    if (n.name !== this.name) return false;
 
-            if (leftKeys.length !== rightKeys.length) return false;
+    const dfs = (left, right) => {
+      let leftKeys = Object.keys(left).sort(), rightKeys = Object.keys(right).sort();
 
-            for (let i = 0, length = leftKeys.length; i < length; ++i) {
-                if (leftKeys[i] !== rightKeys[i]) return false;
-                if (typeof left[leftKeys[i]] == 'object' && typeof right[rightKeys[i]] == 'object') {
-                    if (!dfs(left[leftKeys[i]], right[rightKeys[i]])) return false;
-                } else {
-                    if(left[leftKeys[i]] !== right[rightKeys[i]]) return false;
-                }
-            }
+      if (leftKeys.length !== rightKeys.length) return false;
 
-            return true;
+      for (let i = 0, length = leftKeys.length; i < length; ++i) {
+        if (leftKeys[i] !== rightKeys[i]) return false;
+        if (typeof left[leftKeys[i]] == 'object' && typeof right[rightKeys[i]] == 'object') {
+          if (!dfs(left[leftKeys[i]], right[rightKeys[i]])) return false;
+        } else {
+          if (left[leftKeys[i]] !== right[rightKeys[i]]) return false;
         }
+      }
 
-        return dfs(this.template, n.template);
+      return true;
     }
 
-    match(n) {
-        const dfs = (t, obj) => {
-            let objKeys = Object.keys(obj).sort(), tKeys = Object.keys(t).sort();
-            for(let i of tKeys) {
-                if(objKeys.indexOf(i) < 0) {
-                    let type = t[i];
-                    if(type instanceof Required) continue;
-                    if(type instanceof Default) continue;
-                    if(type instanceof Endless) continue;
-                    // This duck object must has this key, so it verfies failure.
-                    return false;
-                }
-                if((t[i] instanceof Type) && (!t[i].match(obj[i]))) return false;
-                else if((typeof t[i] === 'object' && (!dfs(t[i], obj[i])))) return false;
-                else if(!(obj[i] instanceof t[i])) return false;
-            }
-            return true;
+    return dfs(this.template, n.template);
+  }
+
+  match(n) {
+    const dfs = (t, obj) => {
+      let objKeys = Object.keys(obj).sort(), tKeys = Object.keys(t).sort();
+      for (let i of tKeys) {
+        if (objKeys.indexOf(i) < 0) {
+          let type = t[i];
+          if (type instanceof Required) continue;
+          if (type instanceof Default) continue;
+          if (type instanceof Endless) continue;
+          // This duck object must has this key, so it verfies failure.
+          return false;
         }
-
-        return dfs(this.template, n);
+        if ((t[i] instanceof Type) && (!t[i].match(obj[i]))) return false;
+        else if ((typeof t[i] === 'object' && (!dfs(t[i], obj[i])))) return false;
+        else if (!(obj[i] instanceof t[i])) return false;
+      }
+      return true;
     }
 
-    weight() {
-        return Weights.Normal;
-    }
+    return dfs(this.template, n);
+  }
 
-    depth() {
-        return 1;
-    }
+  weight() {
+    return Weights.Normal;
+  }
+
+  depth() {
+    return 1;
+  }
 }
 
 class Endless extends Type {
-    constructor(type) {
-        super("endless");
-        this.type = type;
-    }
+  constructor(type) {
+    super("endless");
+    this.type = type;
+  }
 
-    equals(n) {
-        if(n.name !== this.name) return false;
-        if(this.type instanceof Type) return this.type.equals(n.type);
-        else return this.type === n.type;
-    }
+  equals(n) {
+    if (n.name !== this.name) return false;
+    if (this.type instanceof Type) return this.type.equals(n.type);
+    else return this.type === n.type;
+  }
 
-    match(n) {
-        if(this.type instanceof Type) return this.type.match(n);
-        else return n instanceof this.type;
-    }
+  match(n) {
+    if (this.type instanceof Type) return this.type.match(n);
+    else return n instanceof this.type;
+  }
 
-    weight() {
-        return Weights.Normal;
-    }
+  weight() {
+    return Weights.Normal;
+  }
 
-    depth() {
-        return 1 + (this.type instanceof Type) ? this.type.depth() : 0;
-    }
+  depth() {
+    return 1 + (this.type instanceof Type) ? this.type.depth() : 0;
+  }
 }
 
 class Enum extends Type {
-    constructor(...values) {
-        super("enum");
-        this.values = Array.prototype.slice.call(values);
-    }
+  constructor(...values) {
+    super("enum");
+    this.values = Array.prototype.slice.call(values);
+  }
 
-    equals(n) {
-        if (n.name !== this.name) return false;
+  equals(n) {
+    if (n.name !== this.name) return false;
 
-        let length = this.values.length;
+    let length = this.values.length;
 
-        if (length !== n.values.length) return false;
-        for (let i = 0; i < length; ++i) {
-            if (n.values[i] !== this.values[i]) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    match(n) {
-        for (let i of this.value) {
-            if (i instanceof Type) {
-                if (i.match(n)) return true;
-            }
-            else if (i === n) return true;
-        }
+    if (length !== n.values.length) return false;
+    for (let i = 0; i < length; ++i) {
+      if (n.values[i] !== this.values[i]) {
         return false;
+      }
     }
+    return true;
+  }
 
-    weight() {
-        return Weights.Normal;
+  match(n) {
+    for (let i of this.value) {
+      if (i instanceof Type) {
+        if (i.match(n)) return true;
+      }
+      else if (i === n) return true;
     }
+    return false;
+  }
 
-    depth() {
-        return 1;
-    }
+  weight() {
+    return Weights.Normal;
+  }
+
+  depth() {
+    return 1;
+  }
 }
 
 class Except extends Type {
-    constructor(...types) {
-        super("except");
-        this.types = Array.prototype.slice.call(types);
+  constructor(...types) {
+    super("except");
+    this.types = Array.prototype.slice.call(types);
+  }
+
+  equals(n) {
+    if (n.name !== this.name) return false;
+
+    let length = this.types.length;
+
+    if (length !== n.types.length) return false;
+    for (let i = 0; i < length; ++i) {
+      if (n.types[i] !== this.types[i]) {
+        return false;
+      }
     }
+    return true;
+  }
 
-    equals(n) {
-        if (n.name !== this.name) return false;
-
-        let length = this.types.length;
-
-        if (length !== n.types.length) return false;
-        for (let i = 0; i < length; ++i) {
-            if (n.types[i] !== this.types[i]) {
-                return false;
-            }
-        }
-        return true;
+  match(n) {
+    for (let i of this.types) {
+      if (i instanceof Type) {
+        if (i.match(n)) return false;
+      }
+      else if (n instanceof i) return false;
     }
+    return true;
+  }
 
-    match(n) {
-        for (let i of this.types) {
-            if (i instanceof Type) {
-                if (i.match(n)) return false;
-            }
-            else if (n instanceof i) return false;
-        }
-        return true;
-    }
+  weight() {
+    return this.types.reduce((prev, next) => prev + (next instanceof Type ? next.weight() : Weights.Normal), 0);
+  }
 
-    weight() {
-        return this.types.reduce((prev, next) => prev + (next instanceof Type ? next.weight() : Weights.Normal), 0);
-    }
-
-    depth() {
-        return 1 + this.types.reduce((prev, next) => {
-            if (next instanceof Type) {
-                if (prev >= next.depth()) return prev;
-                else return next.depth();
-            }
-            else return 1;
-        }, this.types[0].depth());
-    }
+  depth() {
+    return 1 + this.types.reduce((prev, next) => {
+      if (next instanceof Type) {
+        if (prev >= next.depth()) return prev;
+        else return next.depth();
+      }
+      else return 1;
+    }, this.types[0].depth());
+  }
 }
 
 class Required extends Type {
-    constructor(type) {
-        super("required");
-        this.type = type;
-    }
+  constructor(type) {
+    super("required");
+    this.type = type;
+  }
 
-    equals(n) {
-        if(n.name !== this.name) return false;
-        if(this.type instanceof Type) return this.type.equals(n.type);
-        else return this.type === n.type;
-    }
+  equals(n) {
+    if (n.name !== this.name) return false;
+    if (this.type instanceof Type) return this.type.equals(n.type);
+    else return this.type === n.type;
+  }
 
-    match(n) {
-        if(this.type instanceof Type) return this.type.match(n);
-        else return n instanceof this.type;
-    }
+  match(n) {
+    if (this.type instanceof Type) return this.type.match(n);
+    else return n instanceof this.type;
+  }
 
-    weight() {
-        return Weights.Normal;
-    }
+  weight() {
+    return Weights.Normal;
+  }
 
-    depth() {
-        return 1 + (this.type instanceof Type) ? this.type.depth() : 0;
-    }
+  depth() {
+    return 1 + (this.type instanceof Type) ? this.type.depth() : 0;
+  }
 }
 
 class Union extends Type {
-    constructor(...types) {
-        super("union");
-        this.types = Array.prototype.slice.call(types);
-    }
+  constructor(...types) {
+    super("union");
+    this.types = Array.prototype.slice.call(types);
+  }
 
-    equals(n) {
-        if (n.name !== this.name) return false;
+  equals(n) {
+    if (n.name !== this.name) return false;
 
-        let length = this.types.length;
+    let length = this.types.length;
 
-        if (length !== n.types.length) return false;
-        for (let i = 0; i < length; ++i) {
-            if (n.types[i] !== this.types[i]) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    match(n) {
-        for (let i of this.types) {
-            if (i instanceof Type) {
-                if (i.match(n)) return true;
-            }
-            else if (n instanceof i) return true;
-        }
+    if (length !== n.types.length) return false;
+    for (let i = 0; i < length; ++i) {
+      if (n.types[i] !== this.types[i]) {
         return false;
+      }
     }
+    return true;
+  }
 
-    weight() {
-        return this.types.reduce((prev, next) => prev + (next instanceof Type ? next.weight() : Weights.Normal), 0);
+  match(n) {
+    for (let i of this.types) {
+      if (i instanceof Type) {
+        if (i.match(n)) return true;
+      }
+      else if (n instanceof i) return true;
     }
+    return false;
+  }
 
-    depth() {
-        return 1 + this.types.reduce((prev, next) => {
-            if (next instanceof Type) {
-                if (prev >= next.depth()) return prev;
-                else return next.depth();
-            }
-            else return 1;
-        }, this.types[0].depth());
-    }
+  weight() {
+    return this.types.reduce((prev, next) => prev + (next instanceof Type ? next.weight() : Weights.Normal), 0);
+  }
+
+  depth() {
+    return 1 + this.types.reduce((prev, next) => {
+      if (next instanceof Type) {
+        if (prev >= next.depth()) return prev;
+        else return next.depth();
+      }
+      else return 1;
+    }, this.types[0].depth());
+  }
 }
 
 const override = list => {
@@ -528,21 +528,22 @@ const typical = (params, func, level) => {
   };
 
   var transform_object = obj => {
-    for(let i of Object.keys(obj)) {
-      if(Array.isArray(obj[i])) obj[i] = transform_array(obj[i]);
-      else if(typeof obj[i] == 'object') obj[i] = transform_object(obj[i]);
+    for (let i of Object.keys(obj)) {
+      if (Array.isArray(obj[i])) obj[i] = transform_array(obj[i]);
+      else if (typeof obj[i] == 'object') obj[i] = transform_object(obj[i]);
     }
     return obj;
   };
 
   // Verify the parameter.
-  if(Array.isArray(params)) params = transform_array(params);
-  else if(typeof params === 'object') params = transform_object(params);
+  // TODO: 问题应该就是出在这，不应该直接对这个参数本体进行验证，而是应该对数组的每一个元素进行验证
+  if (Array.isArray(params)) params = transform_array(params);
+  else if (typeof params === 'object') params = transform_object(params);
 
   // Write parameters and extra information to the functional object.
   func.parameters = params;
 
-  if(level) if(typeof level !== 'number') throw new Error("Level must be a number!");
+  if (level) if (typeof level !== 'number') throw new Error("Level must be a number!");
   func.level = level;
 
   return func;
