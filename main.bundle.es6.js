@@ -394,7 +394,11 @@ const override = list => {
     let candidated = functions.filter(f => {
       let pos = 0, flag = args.map(() => false);
       for (let param of f.parameters) {
-        if ((!param instanceof Type) && (!args[pos] instanceof param)) return false;
+        // TODO: 莫名其妙的，下面这个 if 好似废了一样，非 Type 附属类型无法执行 if 内的语句块
+        if (!param instanceof Type) {
+          if (args[pos] instanceof param) return true;
+          else return false;
+        }
         switch (param.name) {
           case "enum":
           case "union":
@@ -419,10 +423,11 @@ const override = list => {
             while (param.match(args[pos])) flag[pos++] = true;
             break;
           default:
+            // TODO: 无法判断普通类型
             throw new Error("Unknown type: " + param.name);
         }
       }
-      flag = flag.reduce((prev, next) => prev && next);
+      flag = flag.length > 0 ? flag.reduce((prev, next) => prev && next) : true;
       return flag;
     }).reduce((prev, next) => {
       let next_weight = next.map(param => param.weight()).reduce((prev, next) => prev + next);
@@ -453,8 +458,14 @@ const override = list => {
   };
 }
 
+// TODO: typical 改成 strongly
 const typical = (params, func, level) => {
   func.typical_tag = true;
+
+  // Check the parameter.
+  if(!Array.isArray(params)) throw new Error("You should provide an array as the parameter list!");
+  if(typeof func !== 'function') throw new Error("You should provide an extra function!");
+  if(level && typeof level !== 'number') throw new Error("You should provide a number as the level!");
 
   var transform_array = arr => {
     if (!Array.isArray(arr)) throw new Error("Is that an array?!");
@@ -536,14 +547,15 @@ const typical = (params, func, level) => {
   };
 
   // Verify the parameter.
-  // TODO: 问题应该就是出在这，不应该直接对这个参数本体进行验证，而是应该对数组的每一个元素进行验证
-  if (Array.isArray(params)) params = transform_array(params);
-  else if (typeof params === 'object') params = transform_object(params);
-
+  params.map(n => {
+    if (Array.isArray(n)) return transform_array(n);
+    else if (typeof n === 'object') return transform_object(n);
+    else return n;
+  })
+  
   // Write parameters and extra information to the functional object.
   func.parameters = params;
 
-  if (level) if (typeof level !== 'number') throw new Error("Level must be a number!");
   func.level = level;
 
   return func;
