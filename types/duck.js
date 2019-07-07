@@ -12,10 +12,10 @@ export default class Duck extends Type {
     // Check the object.
     const dfs = n => {
       for (let i of Object.keys(n)) {
-        if (!(i instanceof Type || ['function', 'object'].indexOf(i) !== -1)) {
+        if (!(n[i] instanceof Type || ['function', 'object'].indexOf(typeof n[i]) !== -1)) {
           throw new Error("You cannot use the build-in values to be the class type!")
         }
-        if (typeof i === 'object') dfs(i);
+        if (typeof n[i] === 'object') dfs(i);
       }
     }
     if (typeof obj !== 'object') throw new Error("You cannot use the build-in values to be the class type!");

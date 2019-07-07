@@ -213,7 +213,7 @@ export const typical = (params, func, level) => {
       if (Array.isArray(obj[i])) obj[i] = transform_array(obj[i]);
       else if (typeof obj[i] == 'object') obj[i] = transform_object(obj[i]);
     }
-    return obj;
+    return new Duck(obj);
   };
 
   // Verify the parameter.
