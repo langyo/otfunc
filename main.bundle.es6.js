@@ -394,8 +394,7 @@ const override = list => {
     let candidated = functions.filter(f => {
       let pos = 0, flag = args.map(() => false);
       for (let param of f.parameters) {
-        // TODO: 莫名其妙的，下面这个 if 好似废了一样，非 Type 附属类型无法执行 if 内的语句块
-        if (!param instanceof Type) {
+        if (!(param instanceof Type)) {
           if (args[pos] instanceof param) return true;
           else return false;
         }
@@ -429,32 +428,41 @@ const override = list => {
       }
       flag = flag.length > 0 ? flag.reduce((prev, next) => prev && next) : true;
       return flag;
-    }).reduce((prev, next) => {
-      let next_weight = next.map(param => param.weight()).reduce((prev, next) => prev + next);
-      let next_depth = next.map(param => param.depth()).reduce((prev, next) => prev > next ? prev : next);
-      let next_obj = {
-        func: next,
-        weight: next_weight,
-        depth: next_depth
-      }
+    });
+    // .reduce((prev, next) => {
+    //   let next_weight = next.parameters.map(param => param.weight());
+    //   if(next_weight.length > 0) next_weight = next_weight.reduce((prev, next) => prev + next);
+    //   else next_weight = 0;
 
-      if (prev.func.level && next.leve) {
-        if (prev.func.level > next.level) return prev;
-        else if (prev.func.level < next.level) return next_obj;
-        else throw new Error("Cannot have the same level override!");
-      }
-      else if (prev.func.level) return prev;
-      else if (next.level) return next_obj;
+    //   let next_depth = next.parameters.map(param => param.depth());
+    //   if(next_depth.length > 0) next_depth = next_depth.reduce((prev, next) => prev > next ? prev : next);
+    //   else next_depth = 0;
 
-      if (prev.weight > next.weight) return prev;
-      else if (prev.depth > next_depth) return next_obj;
-      else throw new Error(
-        "Cannot parse these arguments to the exact function: ("
-        + args.reduce((prev, next) => prev + ", " + next, "")
-        + ")");
-    }, { func: null, weight: 0, depth: Infinity }).func;
+    //   let next_obj = {
+    //     func: next,
+    //     weight: next_weight,
+    //     depth: next_depth
+    //   }
 
-    return candidated.apply(this, args);
+    //   if (prev.func.level && next.level) {
+    //     if (prev.func.level > next.level) return prev;
+    //     else if (prev.func.level < next.level) return next_obj;
+    //     else throw new Error("Cannot have the same level override!");
+    //   }
+    //   else if (prev.func.level) return prev;
+    //   else if (next.level) return next_obj;
+
+    //   if (prev.weight > next.weight) return prev;
+    //   else if (prev.depth > next_depth) return next_obj;
+    //   else throw new Error(
+    //     "Cannot parse these arguments to the exact function: ("
+    //     + args.reduce((prev, next) => prev + ", " + next, "")
+    //     + ")");
+    // }, { func: null, weight: 0, depth: Infinity }).func;
+
+    if(candidated.length > 1) throw new Error("It is not supported to filter the optimal function from multiple candidate functions."); 
+    if(candidated.length < 1) throw new Error("No match!");
+    return candidated[0].apply(this, args);
   };
 }
 
