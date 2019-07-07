@@ -47,13 +47,15 @@ class Array_ extends Type {
   match(n) {
     if (!Array.isArray(n)) return false;
 
+    // TODO: 下面的 for 循环没有进行正确的迭代，直接拿一边的数组和另一边的单个元素比较
+    // TODO: 很可能其他类似的部分程序也没写对
     if (this.type instanceof Type) {
       for (let i of n) {
         if (!this.type.match(i)) return false;
       }
     } else {
       for (let i of n) {
-        if (!i instanceof this.type) return false;
+        if (!(i instanceof this.type)) return false;
       }
     }
     return true;
@@ -352,7 +354,7 @@ const override = list => {
   // Check the arguments.
   if (!Array.isArray(list)) throw new Error("The argument is not an array!");
   let functions = list.map((func, index) => {
-    if (!func instanceof Function) throw new Error("That's not a exact function at " + index);
+    if (!(func instanceof Function)) throw new Error("That's not a exact function at " + index);
     if (!func.typical_tag) {
       // Package it as a function, which the parameters are all typeness.
       let params = [];
@@ -554,14 +556,11 @@ const typical = (params, func, level) => {
   };
 
   // Verify the parameter.
-  params.map(n => {
+  func.parameters = params.map(n => {
     if (Array.isArray(n)) return transform_array(n);
     else if (typeof n === 'object') return transform_object(n);
     else return n;
   })
-  
-  // Write parameters and extra information to the functional object.
-  func.parameters = params;
 
   func.level = level;
 
