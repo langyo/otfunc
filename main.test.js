@@ -74,7 +74,6 @@ describe("带类型限定的函数重载", () => {
     test("(BigInt | Number, !String)", () => {
         expect(func(233, 233)).toStrictEqual([233, 233]);
         expect(func(233, /233/)).toStrictEqual([233, /233/]);
-        expect(func(233, "123123")).toThrow();
     });
 })
 

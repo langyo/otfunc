@@ -189,7 +189,7 @@ export const typical = (params, func, level) => {
             return new Endless(new Union(arr.slice(1)));
           }
         } else return new Endless(arr[1]);
-      } else if (typeof arr[0] !== 'object') {
+      } else if (typeof arr[0] !== 'object' && typeof arr[0] !== 'function') {
         // Enum
         /*
           Notice:
