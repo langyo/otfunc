@@ -542,7 +542,7 @@ const typical = (params, func, level) => {
       }
     } else {
       // Normal array requires a single type.
-      return new Array_(arr);
+      return new Array_(arr[0]);
     }
   };
 
