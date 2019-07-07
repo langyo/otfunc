@@ -47,15 +47,13 @@ class Array_ extends Type {
   match(n) {
     if (!Array.isArray(n)) return false;
 
-    // TODO: 下面的 for 循环没有进行正确的迭代，直接拿一边的数组和另一边的单个元素比较
-    // TODO: 很可能其他类似的部分程序也没写对
     if (this.type instanceof Type) {
       for (let i of n) {
         if (!this.type.match(i)) return false;
       }
     } else {
       for (let i of n) {
-        if (!(i instanceof this.type)) return false;
+        if (i.__proto__.constructor !== this.type) return false;
       }
     }
     return true;
@@ -84,7 +82,7 @@ class Default extends Type {
 
   match(n) {
     if (this.type instanceof Type) return this.type.match(n);
-    else return n instanceof this.type;
+    else return n.__proto__.constructor === this.type;
   }
 
   weight() {
@@ -152,7 +150,7 @@ class Duck extends Type {
         }
         if ((t[i] instanceof Type) && (!t[i].match(obj[i]))) return false;
         else if ((typeof t[i] === 'object' && (!dfs(t[i], obj[i])))) return false;
-        else if (!(obj[i] instanceof t[i])) return false;
+        else if (obj[i].__proto__.constructor !== t[i]) return false;
       }
       return true;
     }
@@ -183,7 +181,7 @@ class Endless extends Type {
 
   match(n) {
     if (this.type instanceof Type) return this.type.match(n);
-    else return n instanceof this.type;
+    else return n.__proto__.constructor === this.type;
   }
 
   weight() {
@@ -196,7 +194,7 @@ class Endless extends Type {
 }
 
 class Enum extends Type {
-  constructor(...values) {
+  constructor(values) {
     super("enum");
     this.values = Array.prototype.slice.call(values);
   }
@@ -216,7 +214,7 @@ class Enum extends Type {
   }
 
   match(n) {
-    for (let i of this.value) {
+    for (let i of this.values) {
       if (i instanceof Type) {
         if (i.match(n)) return true;
       }
@@ -235,7 +233,7 @@ class Enum extends Type {
 }
 
 class Except extends Type {
-  constructor(...types) {
+  constructor(types) {
     super("except");
     this.types = Array.prototype.slice.call(types);
   }
@@ -259,7 +257,7 @@ class Except extends Type {
       if (i instanceof Type) {
         if (i.match(n)) return false;
       }
-      else if (n instanceof i) return false;
+      else if (n.__proto__.constructor === i) return false;
     }
     return true;
   }
@@ -293,7 +291,7 @@ class Required extends Type {
 
   match(n) {
     if (this.type instanceof Type) return this.type.match(n);
-    else return n instanceof this.type;
+    else return n.__proto__.constructor === this.type;
   }
 
   weight() {
@@ -306,7 +304,7 @@ class Required extends Type {
 }
 
 class Union extends Type {
-  constructor(...types) {
+  constructor(types) {
     super("union");
     this.types = Array.prototype.slice.call(types);
   }
@@ -330,7 +328,7 @@ class Union extends Type {
       if (i instanceof Type) {
         if (i.match(n)) return true;
       }
-      else if (n instanceof i) return true;
+      else if (n.__proto__.constructor === i) return true;
     }
     return false;
   }
@@ -407,21 +405,22 @@ const override = list => {
           case "array":
           case "duck":
           case "any":
+            if (!args[pos]) return false;
             if (!param.match(args[pos])) return false;
             flag[pos++] = true;
             break;
           case "required":
-            if (param.match(args[pos])) flag[pos++] = true;
+            if (args[pos] && param.match(args[pos])) flag[pos++] = true;
             break;
           case "default":
-            if (param.match(args[pos])) flag[pos++] = true;
+            if (args[pos] && param.match(args[pos])) flag[pos++] = true;
             else {
               flag[pos++] = true;
               args = args.slice(0, pos).concat([param.value]).concat(args.slice(pos));
             }
             break;
           case "endless":
-            while (param.match(args[pos])) flag[pos++] = true;
+            while (args[pos] && param.match(args[pos])) flag[pos++] = true;
             break;
           default:
             throw new Error("Unknown type: " + param.name);
