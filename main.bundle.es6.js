@@ -395,7 +395,7 @@ const override = list => {
       let pos = 0, flag = args.map(() => false);
       for (let param of f.parameters) {
         if (!(param instanceof Type)) {
-          if (args[pos] instanceof param) return true;
+          if (args[pos] && args[pos].__proto__.constructor === param) return true;
           else return false;
         }
         switch (param.name) {
@@ -422,7 +422,6 @@ const override = list => {
             while (param.match(args[pos])) flag[pos++] = true;
             break;
           default:
-            // TODO: 无法判断普通类型
             throw new Error("Unknown type: " + param.name);
         }
       }
