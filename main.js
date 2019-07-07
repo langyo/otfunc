@@ -211,7 +211,7 @@ export const typical = (params, func, level) => {
   var transform_object = obj => {
     for (let i of Object.keys(obj)) {
       if (Array.isArray(obj[i])) obj[i] = transform_array(obj[i]);
-      else if (typeof obj[i] == 'object') obj[i] = transform_object(obj[i]);
+      else if ((!(obj[i] instanceof Type)) && typeof obj[i] === 'object') obj[i] = transform_object(obj[i]);
     }
     return new Duck(obj);
   };
@@ -219,9 +219,9 @@ export const typical = (params, func, level) => {
   // Verify the parameter.
   func.parameters = params.map(n => {
     if (Array.isArray(n)) return transform_array(n);
-    else if (typeof n === 'object') return transform_object(n);
+    else if ((!(n instanceof Type)) && typeof n === 'object') return transform_object(n);
     else return n;
-  })
+  });
 
   func.level = level;
 
