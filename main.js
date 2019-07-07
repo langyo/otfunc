@@ -8,6 +8,8 @@ import Required from "./types/required";
 import Default from "./types/default";
 import Endless from "./types/endless";
 
+import Type from "./types/type";
+
 export const override = list => {
   // Check the arguments.
   if (!Array.isArray(list)) throw new Error("The argument is not an array!");

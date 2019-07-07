@@ -9,12 +9,12 @@ describe("无类型限定的函数重载", () => {
     ]);
 
     test("无参数", () => {
-        expect(funcBasic()).toBe(true);
+        expect(funcBasic()).toStrictEqual(true);
     });
 
     test("带两个参数", () => {
-        expect(funcBasic(1, 2)).toBe([1, 2]);
-        expect(funcBasic("a", "b")).toBe(["a", "b"]);
+        expect(funcBasic(1, 2)).toStrictEqual([1, 2]);
+        expect(funcBasic("a", "b")).toStrictEqual(["a", "b"]);
     });
 });
 
@@ -45,48 +45,36 @@ describe("带类型限定的函数重载", () => {
         typical(
             [[BigInt, Number], [["!", String]]],
             (num, notString) => [num, notString]
-        ),
-
-        typical(
-            [[[BigInt], [Number]]],
-            numbers => numbers
         )
     ]);
 
 
     test("()", () => {
-        expect(func()).toBe(true);
+        expect(func()).toStrictEqual(true);
     });
     
     test("(Number, String)", () => {
-        expect(func(1, "a")).toBe([1, "a"]);
+        expect(func(1, "a")).toStrictEqual([1, "a"]);
     });
 
     test("([Number])", () => {
-        expect(func([1, 2])).toBe([1, 2]);
+        expect(func([1, 2])).toStrictEqual([1, 2]);
     });
 
     test("( DUCK : { name: String, score: Number })", () => {
         expect(func({
             name: "langyo",
             score: 233
-        })).toBe({
+        })).toStrictEqual({
             name: "langyo",
             score: 233
         })
     });
 
     test("(BigInt | Number, !String)", () => {
-        expect(func(233, 233)).toBe([233, 233]);
-        expect(func(new BigInt(233), 233)).toBe([new BigInt(233), 233]);
-        expect(func(233, /233/)).toBe([233, /233/]);
-        expect(func(new BigInt(233), /233/)).toBe([new BigInt(233), /233/]);
+        expect(func(233, 233)).toStrictEqual([233, 233]);
+        expect(func(233, /233/)).toStrictEqual([233, /233/]);
         expect(func(233, "123123")).toThrow();
-        expect(func(new BigInt(233), "123123")).toThrow();
-    });
-
-    test("([BigInt | Number])", () => {
-        expect(func([new BigInt(233), new BigInt(233333)])).toBe([new BigInt(233), new BigInt(233333)]);
     });
 })
 
