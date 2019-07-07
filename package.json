@@ -1,7 +1,7 @@
 {
   "name": "otfunc",
   "version": "0.1.0",
-  "description": "A JavaScript library to describe the overrided function and typical arguments.",
+  "description": "A JavaScript library to describe the overrided function and strong type arguments.",
   "main": "main.bundle.js",
   "keywords": [
     "javascript",

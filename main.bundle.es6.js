@@ -353,11 +353,11 @@ const override = list => {
   if (!Array.isArray(list)) throw new Error("The argument is not an array!");
   let functions = list.map((func, index) => {
     if (!(func instanceof Function)) throw new Error("That's not a exact function at " + index);
-    if (!func.typical_tag) {
+    if (!func.typeful_tag) {
       // Package it as a function, which the parameters are all typeness.
       let params = [];
       for (let i = 0; i < func.length; ++i) params.push(Types.Any);
-      return typical(params, func);
+      return typeful(params, func);
     } else return func;
   })
   // .reduce((list, func) => {
@@ -466,9 +466,8 @@ const override = list => {
   };
 }
 
-// TODO: typical 改成 strongly
-const typical = (params, func, level) => {
-  func.typical_tag = true;
+const typeful = (params, func, level) => {
+  func.typeful_tag = true;
 
   // Check the parameter.
   if(!Array.isArray(params)) throw new Error("You should provide an array as the parameter list!");

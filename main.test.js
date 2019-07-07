@@ -1,4 +1,4 @@
-import { override, typical, Types } from "./main";
+import { override, typeful, Types } from "./main";
 
 describe("无类型限定的函数重载", () => {
     const funcBasic = override([
@@ -22,19 +22,19 @@ describe("无类型限定的函数重载", () => {
 describe("带类型限定的函数重载", () => {
     const func = override([
         // 演示带有类型限定的一部分函数重载。
-        typical([], () => true),
+        typeful([], () => true),
 
-        typical(
+        typeful(
             [Number, String],
             (n, s) => [n, s]
         ),
 
-        typical(
+        typeful(
             [[Number]],
             arr => arr
         ),
 
-        typical(
+        typeful(
             [{
                 name: String,
                 score: Number
@@ -42,7 +42,7 @@ describe("带类型限定的函数重载", () => {
             obj => obj
         ),
 
-        typical(
+        typeful(
             [[BigInt, Number], [["!", String]]],
             (num, notString) => [num, notString]
         )
