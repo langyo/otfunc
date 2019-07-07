@@ -12,7 +12,7 @@ export const override = list => {
   // Check the arguments.
   if (!Array.isArray(list)) throw new Error("The argument is not an array!");
   let functions = list.map((func, index) => {
-    if (!func instanceof Function) throw new Error("That's not a exact function at " + index);
+    if (!(func instanceof Function)) throw new Error("That's not a exact function at " + index);
     if (!func.typical_tag) {
       // Package it as a function, which the parameters are all typeness.
       let params = [];
@@ -54,7 +54,10 @@ export const override = list => {
     let candidated = functions.filter(f => {
       let pos = 0, flag = args.map(() => false);
       for (let param of f.parameters) {
-        if ((!param instanceof Type) && (!args[pos] instanceof param)) return false;
+        if (!(param instanceof Type)) {
+          if (args[pos] && args[pos].__proto__.constructor === param) return true;
+          else return false;
+        }
         switch (param.name) {
           case "enum":
           case "union":
@@ -62,59 +65,75 @@ export const override = list => {
           case "array":
           case "duck":
           case "any":
+            if (!args[pos]) return false;
             if (!param.match(args[pos])) return false;
             flag[pos++] = true;
             break;
           case "required":
-            if (param.match(args[pos])) flag[pos++] = true;
+            if (args[pos] && param.match(args[pos])) flag[pos++] = true;
             break;
           case "default":
-            if (param.match(args[pos])) flag[pos++] = true;
+            if (args[pos] && param.match(args[pos])) flag[pos++] = true;
             else {
               flag[pos++] = true;
               args = args.slice(0, pos).concat([param.value]).concat(args.slice(pos));
             }
             break;
           case "endless":
-            while (param.match(args[pos])) flag[pos++] = true;
+            while (args[pos] && param.match(args[pos])) flag[pos++] = true;
             break;
           default:
             throw new Error("Unknown type: " + param.name);
         }
       }
-      flag = flag.reduce((prev, next) => prev && next);
+      flag = flag.length > 0 ? flag.reduce((prev, next) => prev && next) : true;
       return flag;
-    }).reduce((prev, next) => {
-      let next_weight = next.map(param => param.weight()).reduce((prev, next) => prev + next);
-      let next_depth = next.map(param => param.depth()).reduce((prev, next) => prev > next ? prev : next);
-      let next_obj = {
-        func: next,
-        weight: next_weight,
-        depth: next_depth
-      }
+    });
+    // .reduce((prev, next) => {
+    //   let next_weight = next.parameters.map(param => param.weight());
+    //   if(next_weight.length > 0) next_weight = next_weight.reduce((prev, next) => prev + next);
+    //   else next_weight = 0;
 
-      if (prev.func.level && next.leve) {
-        if (prev.func.level > next.level) return prev;
-        else if (prev.func.level < next.level) return next_obj;
-        else throw new Error("Cannot have the same level override!");
-      }
-      else if (prev.func.level) return prev;
-      else if (next.level) return next_obj;
+    //   let next_depth = next.parameters.map(param => param.depth());
+    //   if(next_depth.length > 0) next_depth = next_depth.reduce((prev, next) => prev > next ? prev : next);
+    //   else next_depth = 0;
 
-      if (prev.weight > next.weight) return prev;
-      else if (prev.depth > next_depth) return next_obj;
-      else throw new Error(
-        "Cannot parse these arguments to the exact function: ("
-        + args.reduce((prev, next) => prev + ", " + next, "")
-        + ")");
-    }, { func: null, weight: 0, depth: Infinity }).func;
+    //   let next_obj = {
+    //     func: next,
+    //     weight: next_weight,
+    //     depth: next_depth
+    //   }
 
-    return candidated.apply(this, args);
+    //   if (prev.func.level && next.level) {
+    //     if (prev.func.level > next.level) return prev;
+    //     else if (prev.func.level < next.level) return next_obj;
+    //     else throw new Error("Cannot have the same level override!");
+    //   }
+    //   else if (prev.func.level) return prev;
+    //   else if (next.level) return next_obj;
+
+    //   if (prev.weight > next.weight) return prev;
+    //   else if (prev.depth > next_depth) return next_obj;
+    //   else throw new Error(
+    //     "Cannot parse these arguments to the exact function: ("
+    //     + args.reduce((prev, next) => prev + ", " + next, "")
+    //     + ")");
+    // }, { func: null, weight: 0, depth: Infinity }).func;
+
+    if(candidated.length > 1) throw new Error("It is not supported to filter the optimal function from multiple candidate functions."); 
+    if(candidated.length < 1) throw new Error("No match!");
+    return candidated[0].apply(this, args);
   };
 }
 
+// TODO: typical 改成 strongly
 export const typical = (params, func, level) => {
   func.typical_tag = true;
+
+  // Check the parameter.
+  if(!Array.isArray(params)) throw new Error("You should provide an array as the parameter list!");
+  if(typeof func !== 'function') throw new Error("You should provide an extra function!");
+  if(level && typeof level !== 'number') throw new Error("You should provide a number as the level!");
 
   var transform_array = arr => {
     if (!Array.isArray(arr)) throw new Error("Is that an array?!");
@@ -183,26 +202,25 @@ export const typical = (params, func, level) => {
       }
     } else {
       // Normal array requires a single type.
-      return new Array_(arr);
+      return new Array_(arr[0]);
     }
   };
 
   var transform_object = obj => {
-    for(let i of Object.keys(obj)) {
-      if(Array.isArray(obj[i])) obj[i] = transform_array(obj[i]);
-      else if(typeof obj[i] == 'object') obj[i] = transform_object(obj[i]);
+    for (let i of Object.keys(obj)) {
+      if (Array.isArray(obj[i])) obj[i] = transform_array(obj[i]);
+      else if (typeof obj[i] == 'object') obj[i] = transform_object(obj[i]);
     }
     return obj;
   };
 
   // Verify the parameter.
-  if(Array.isArray(params)) params = transform_array(params);
-  else if(typeof params === 'object') params = transform_object(params);
+  func.parameters = params.map(n => {
+    if (Array.isArray(n)) return transform_array(n);
+    else if (typeof n === 'object') return transform_object(n);
+    else return n;
+  })
 
-  // Write parameters and extra information to the functional object.
-  func.parameters = params;
-
-  if(level) if(typeof level !== 'number') throw new Error("Level must be a number!");
   func.level = level;
 
   return func;

@@ -1,5 +1,5 @@
 export default class Type {
-    constructor(name) {
-        this.name = name;
-    }
+  constructor(name) {
+    this.name = name;
+  }
 }
