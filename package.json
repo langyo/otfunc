@@ -25,26 +25,6 @@
     "url": "https://github.com/langyo/otfunc/issues"
   },
   "homepage": "https://github.com/langyo/otfunc",
-  "babel": {
-    "presets": [
-      [
-        "@babel/preset-env",
-        {
-          "modules": "commonjs",
-          "targets": {
-            "node": "current",
-            "chrome": "53",
-            "ie": "11"
-          }
-        }
-      ]
-    ],
-    "plugins": [
-      [
-        "@babel/plugin-proposal-class-properties"
-      ]
-    ]
-  },
   "devDependencies": {
     "@babel/core": "^7.4.5",
     "@babel/plugin-proposal-class-properties": "^7.4.4",
