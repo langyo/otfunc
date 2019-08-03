@@ -1,11 +1,11 @@
-import Type from "./type";
-import Weights from "../weight";
+const Type = require("./type");
+const Weights = require("../weight");
 
-import Required from "./required";
-import Default from "./default";
-import Endless from "./endless";
+const Required = require("./required");
+const Default = require("./default");
+const Endless = require("./endless");
 
-export default class Duck extends Type {
+module.exports = class Duck extends Type {
   constructor(obj) {
     super("duck");
 
@@ -22,6 +22,11 @@ export default class Duck extends Type {
     dfs(obj);
 
     this.template = obj;
+
+    this.equals.bind(this);
+    this.match.bind(this);
+    this.weight.bind(this);
+    this.depth.bind(this);
   }
 
   equals(n) {

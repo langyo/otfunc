@@ -7,7 +7,7 @@
 ## 例子
 
 ```javascript
-import { override, typeful, Types } from otfunc;
+const { override, typeful, Types } = require(otfunc;
 
 const func = override([
   // 演示最基本的函数重载。

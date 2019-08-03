@@ -1,10 +1,15 @@
-import Type from "./type";
-import Weights from "../weight";
+const Type = require("./type");
+const Weights = require("../weight");
 
-export default class Required extends Type {
+module.exports = class Required extends Type {
   constructor(type) {
     super("required");
     this.type = type;
+
+    this.equals.bind(this);
+    this.match.bind(this);
+    this.weight.bind(this);
+    this.depth.bind(this);
   }
 
   equals(n) {

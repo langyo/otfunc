@@ -1,10 +1,15 @@
-import Type from "./type";
-import Weights from "../weight";
+const Type = require("./type");
+const Weights = require("../weight");
 
-export default class Except extends Type {
+module.exports = class Except extends Type {
   constructor(types) {
     super("except");
     this.types = Array.prototype.slice.call(types);
+
+    this.equals.bind(this);
+    this.match.bind(this);
+    this.weight.bind(this);
+    this.depth.bind(this);
   }
 
   equals(n) {

@@ -25,13 +25,10 @@
     "url": "https://github.com/langyo/otfunc/issues"
   },
   "homepage": "https://github.com/langyo/otfunc",
-  "devDependencies": {
-    "@babel/core": "^7.4.5",
-    "@babel/plugin-proposal-class-properties": "^7.4.4",
-    "@babel/preset-env": "^7.4.5",
-    "babelify": "^10.0.0",
-    "browserify": "^16.2.3",
-    "watchify": "^3.11.1",
-    "jest": "^24.1.0"
+  "dependencies": {
+    "@babel/core": "^7.5.5",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "jest": "^24.8.0"
   }
 }

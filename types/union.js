@@ -1,10 +1,15 @@
-import Type from "./type";
-import Weights from "../weight";
+const Type = require("./type");
+const Weights = require("../weight");
 
-export default class Union extends Type {
+module.exports = class Union extends Type {
   constructor(types) {
     super("union");
     this.types = Array.prototype.slice.call(types);
+
+    this.equals.bind(this);
+    this.match.bind(this);
+    this.weight.bind(this);
+    this.depth.bind(this);
   }
 
   equals(n) {
