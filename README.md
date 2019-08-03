@@ -7,7 +7,7 @@
 ## 例子
 
 ```javascript
-const { override, typeful, Types } = require(otfunc;
+const { override, strongly, Types } = require(otfunc;
 
 const func = override([
   // 演示最基本的函数重载。
@@ -16,19 +16,19 @@ const func = override([
   (a, b) => console.log("无类型推断，有两个参数：", a, b),
 
   // 演示带有类型限定的一部分函数重载。
-  typeful([], () => console.log("带类型推断，无参数")),
+  strongly([], () => console.log("带类型推断，无参数")),
 
-  typeful(
+  strongly(
     [Number, String],
     (n, s) => console.log("带类型推断，参数为数字", n, "与字符串", s)
   ),
   
-  typeful(
+  strongly(
     [[Number]],
     arr => console.log("带类型推断，传入一个数字数组：", arr)
   ),
 
-  typeful(
+  strongly(
     [{
       name: String,
       score: Number
@@ -36,7 +36,7 @@ const func = override([
     obj => console.log("带类型推断，传入一个鸭子类型的对象，限定了传入的参数对应的对象必须包含哪些键、类型必须为什么：", obj)
   ),
 
-  typeful(
+  strongly(
     [[BigInt, Number], [["!", String]]],
     (num, notString) => console.log(
       "带类型推断，",
@@ -45,7 +45,7 @@ const func = override([
     )
   ),
 
-  typeful(
+  strongly(
     [[[BigInt], [Number]]],
     numbers => console.log("带类型推断，这次为复合类型，允许你传入一个数字数组或一个大数数组：", numbers)
   )
